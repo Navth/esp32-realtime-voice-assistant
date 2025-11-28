@@ -11,7 +11,7 @@ const app = express();
 // Create WAV file writer
 import fs from 'fs';
 import { AudioManager, SampleRate } from './audio';
-import { createOpenAICompletion, createOpenAICompletionStream } from './openai';
+import { createGeminiCompletion, createGeminiCompletionStream } from './gemini';
 import { base64ToWavBuffer } from './speech';
 
 const WS_PORT = parseInt(process.env.WS_PORT || "8888");
@@ -72,7 +72,7 @@ async function stopRecordingAndProcessAudio() {
   recording = false;
 
   const buffer = audioManager.getCurrentBuffer();
-  const response = await processAudioWithOpenAI(buffer);
+  const response = await processAudioWithGemini(buffer);
   
   if (response) {
     broadcastAudioToClients(response);
@@ -83,31 +83,28 @@ async function stopRecordingAndProcessAudioAsStream() {
   recording = false;
 
   const buffer = audioManager.getCurrentBuffer();
-  await processAudioWithOpenAIStream(buffer);
-  // No need to broadcast here since processAudioWithOpenAIStream handles it
+  await processAudioWithGeminiStream(buffer);
+  // No need to broadcast here since processAudioWithGeminiStream handles it
 }
 
-async function processAudioWithOpenAI(buffer: Buffer): Promise<Buffer | null> {
+async function processAudioWithGemini(buffer: Buffer): Promise<Buffer | null> {
   try {
-    const res = await createOpenAICompletion(buffer);
-    console.log('OpenAI completion response:', JSON.stringify(res, null, 2));
-    
-    const audioBuffer = base64ToWavBuffer(res.choices[0]?.message?.audio?.data ?? '', SampleRate.RATE_22050);
-    console.log('Received audio buffer from OpenAI:', audioBuffer?.length, 'bytes');
+    console.log('Processing audio with Gemini...');
+    const audioBuffer = await createGeminiCompletion(buffer);
+    console.log('Received audio buffer from Gemini:', audioBuffer?.length, 'bytes');
     
     return audioBuffer || null;
   } catch (error) {
-    console.error('Error creating OpenAI completion:', error);
+    console.error('Error creating Gemini completion:', error);
     return null;
   }
 }
-async function processAudioWithOpenAIStream(buffer: Buffer) {
+async function processAudioWithGeminiStream(buffer: Buffer) {
     try {
-        const stream = await createOpenAICompletionStream(buffer);
-        console.log('Starting to process audio stream from OpenAI');
+        console.log('Starting to process audio stream with Gemini');
+        const stream = createGeminiCompletionStream(buffer);
         
-        for await (const chunk of stream) {
-            const audioData = extractAudioFromChunk(chunk);
+        for await (const audioData of stream) {
             if (audioData) {
                 broadcastStreamAudioToClients(audioData);
             }
@@ -115,20 +112,21 @@ async function processAudioWithOpenAIStream(buffer: Buffer) {
         
         return null; // Streaming mode - no buffer return needed
     } catch (error) {
-        console.error('Error creating OpenAI completion stream:', error);
+        console.error('Error creating Gemini completion stream:', error);
         return null;
     }
 }
 
-function extractAudioFromChunk(chunk: any): Buffer | null {
-    const delta = chunk.choices[0]?.delta;
-    if (!delta?.audio?.data) {
-        return null;
-    }
-
-    console.log('Received audio chunk:', delta.audio.data.length, 'bytes');
-    return Buffer.from(delta.audio.data, 'base64');
-}
+// No longer needed - Gemini streaming handles audio chunks differently
+// function extractAudioFromChunk(chunk: any): Buffer | null {
+//     const delta = chunk.choices[0]?.delta;
+//     if (!delta?.audio?.data) {
+//         return null;
+//     }
+//
+//     console.log('Received audio chunk:', delta.audio.data.length, 'bytes');
+//     return Buffer.from(delta.audio.data, 'base64');
+// }
 
 function handleAudioData(data: Buffer) {
   if (recording) {

@@ -2,8 +2,8 @@ import { WebSocket } from 'ws';
 import * as wav from 'wav';
 import * as fs from 'fs';
 import * as path from 'path';
-import openai from 'openai';
-import { createOpenAICompletion, openaiClient } from './openai';
+// import openai from 'openai';
+// import { createOpenAICompletion, openaiClient } from './openai';
 import { SampleRate } from './audio';
 // import { openai } from './config.cjs';
 // import { audioToItemCreateEvent } from './audioUtils.cjs';
@@ -54,26 +54,27 @@ interface AudioResponse {
 //   return { audioBuffer, currentFileWriter, lastSendTime, responseBuffer };
 // }
 
-export async function processAudioWithOpenAI(audioFilePath: string): Promise<Buffer | null> {
-  try {
-    const fileBuffer = await readAudioFile(audioFilePath);
-    if (!fileBuffer) return null;
+// Deprecated - using Gemini instead
+// export async function processAudioWithOpenAI(audioFilePath: string): Promise<Buffer | null> {
+//   try {
+//     const fileBuffer = await readAudioFile(audioFilePath);
+//     if (!fileBuffer) return null;
 
-    const response = await createOpenAICompletion(fileBuffer);
-    if (!response) return null;
+//     const response = await createOpenAICompletion(fileBuffer);
+//     if (!response) return null;
 
-    if (!response.choices?.[0]?.message?.audio?.data) {
-      console.error('Invalid response format from OpenAI');
-      return null;
-    }
+//     if (!response.choices?.[0]?.message?.audio?.data) {
+//       console.error('Invalid response format from OpenAI');
+//       return null;
+//     }
 
-    return base64ToWavBuffer(response.choices[0].message.audio.data);
+//     return base64ToWavBuffer(response.choices[0].message.audio.data);
 
-  } catch (error) {
-    console.error('Error processing audio with OpenAI:', error);
-    return null;
-  }
-}
+//   } catch (error) {
+//     console.error('Error processing audio with OpenAI:', error);
+//     return null;
+//   }
+// }
 
 
 async function readAudioFile(audioFilePath: string): Promise<Buffer | null> {

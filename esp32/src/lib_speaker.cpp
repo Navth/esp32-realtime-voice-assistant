@@ -1,13 +1,12 @@
-#include <Audio.h>
 #include <Arduino.h>
 #include <driver/i2s.h>
-#include <audioMemoryBuffer.h>
 #include <math.h>
 #include "config.h"
 #include "lib_speaker.h"
 #include "lib_websocket.h"
 #include "lib_button.h"
 #include "mic.h"
+#include "audioMemoryBuffer.h"
 // At the top of the file
 static bool is_speaker_installed = false;
 static bool is_mic_installed = false;
@@ -23,7 +22,6 @@ unsigned long lastToneTime = 0;
 bool isPlayingTone = false;
 unsigned long toneStartTime = 0;
 AudioMemoryBuffer audioMemoryBuffer = AudioMemoryBuffer();
-Audio audio;
 uint8_t speakerdata0[1024 * 1];
 int speaker_offset;
 int data_offset;
@@ -222,8 +220,8 @@ esp_err_t setupSpeakerI2S()
       .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
       .communication_format = I2S_COMM_FORMAT_I2S,
       .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-      .dma_buf_count = bufferCnt,
-      .dma_buf_len = bufferLen,
+      .dma_buf_count = 2,  // Further reduced for memory
+      .dma_buf_len = 256,  // Further reduced for memory
       .use_apll = false,
       .tx_desc_auto_clear = true,
       .fixed_mclk = 0};
@@ -438,34 +436,35 @@ void updateToneState()
     digitalWrite(LED_SPKR, LOW);
   }
 }
-void setupAudio()
-{
-  // setupSpeakerI2S();  // Call this first
-  delay(100);
+// Audio library functions - DISABLED to save memory
+// void setupAudio()
+// {
+//   // setupSpeakerI2S();  // Call this first
+//   delay(100);
 
-  audio.setPinout(I2S_SPEAKER_BCLK, I2S_SPEAKER_LRC, I2S_SPEAKER_DIN);
-  audio.setVolume(2);
-  // audio.
-  audio.connecttohost("http://vis.media-ice.musicradio.com/CapitalMP3");
-}
+//   audio.setPinout(I2S_SPEAKER_BCLK, I2S_SPEAKER_LRC, I2S_SPEAKER_DIN);
+//   audio.setVolume(2);
+//   // audio.
+//   audio.connecttohost("http://vis.media-ice.musicradio.com/CapitalMP3");
+// }
 
-void loopAudio()
-{
-  audio.loop();
-}
+// void loopAudio()
+// {
+//   audio.loop();
+// }
 
-void setVolume(int volume)
-{
-  if (volume >= 0 && volume <= 21)
-  {
-    audio.setVolume(volume);
-    Serial.printf("Volume set to %d\n", volume);
-  }
-  else
-  {
-    Serial.println("Invalid volume level. Please use a value between 0 and 21.");
-  }
-}
+// void setVolume(int volume)
+// {
+//   if (volume >= 0 && volume <= 21)
+//   {
+//     audio.setVolume(volume);
+//     Serial.printf("Volume set to %d\n", volume);
+//   }
+//   else
+//   {
+//     Serial.println("Invalid volume level. Please use a value between 0 and 21.");
+//   }
+// }
 
 void playTestTone()
 {

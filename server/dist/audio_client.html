@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
     <script src="https://unpkg.com/pcm-player"></script>
-    <script type="js/worker.js"></script>
+    <script src="js/worker.js"></script>
 </head>
 <style>
     body {
@@ -60,7 +60,8 @@
         console.error('Worker error:', error);
     };
     worker.addEventListener('message', function (e) {
-        
+        console.log('Received data from worker:', e.data);
+
         graphDataArray = graphDataArray.concat(e.data)
         graphDataArray.splice(0, 1)
 
@@ -68,7 +69,6 @@
             y: [graphDataArray]
         };
 
-        console.log('Received data from worker:', e.data);
         Plotly.update('graph', data_update)
     }, false);
 
@@ -121,13 +121,13 @@
             44100: {
                 inputCodec: 'Int16',
                 channels: 1,
-                sampleRate: 44100,
+                sampleRate: 24000,
             }
         };
 
         player = new PCMPlayer(audioConfig[24000]); // Default to 16kHz, can be changed to 44100
 
-        const WS_URL = 'ws:///192.168.1.27:8888'
+        const WS_URL = 'ws:///192.168.1.27:8899/monitor'
         ws = new WebSocket(WS_URL)
         ws.binaryType = 'arraybuffer';
         ws.addEventListener('open', () => {
@@ -159,7 +159,7 @@
 
     function handleAudioData(data) {
         audioBuffer.push(new Int16Array(data));
-        
+        console.log('Added audio data chunk of size:', data.byteLength);
         if (audioBuffer.length >= BUFFER_SIZE) {
             let combinedBuffer = new Int16Array(BUFFER_SIZE * CHUNK_SIZE);
             let offset = 0;

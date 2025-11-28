@@ -39,24 +39,18 @@ void detectSound(int16_t *buffer, size_t length)
       if (amplitude > lt.threshold)
       {
         soundDetected = true;
-        break;
       }
     }
 
     // Update LED state
     digitalWrite(lt.ledPin, soundDetected ? HIGH : LOW);
 
-    // Only log and send data if sound detected
-    if (soundDetected)
-    {
-      // Serial.print("Peak amplitude: ");
-      // Serial.println(maxAmplitude);
-
-      // Send the actual buffer length, not 0
-      // sendMessage("Hello");
+    // Update Blynk with audio level
+    extern void updateBlynkAudioLevel(int level);
+    if (isRecording && maxAmplitude > 0) {
+      updateBlynkAudioLevel(maxAmplitude);
     }
   }
-  // sendBinaryData(buffer, length * sizeof(int16_t));
 }
 
 esp_err_t setupMicrophone()
@@ -69,8 +63,8 @@ esp_err_t setupMicrophone()
       .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
       .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_STAND_I2S),
       .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-      .dma_buf_count = 8,
-      .dma_buf_len = 64,
+      .dma_buf_count = 2,  // Further reduced for memory
+      .dma_buf_len = 128,  // Further reduced for memory
       .use_apll = false,
       .tx_desc_auto_clear = false,
       .fixed_mclk = 0};
