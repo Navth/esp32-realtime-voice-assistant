@@ -7,6 +7,40 @@ import axios from 'axios';
 const GEMINI_API_KEY = 'AIzaSyCgnCZ3NJTl7qCVD8ZMGIyY6DhnlHCTjQE';
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
+async function generateContentWithRetry(model: any, parts: any[], retries = 3, delay = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await model.generateContent(parts);
+    } catch (error: any) {
+      if (error.status === 429 || error.status === 503) {
+        if (i === retries - 1) throw error;
+        console.log(`Gemini API rate limit/error (${error.status}). Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2;
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
+async function generateContentStreamWithRetry(model: any, parts: any[], retries = 3, delay = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await model.generateContentStream(parts);
+    } catch (error: any) {
+      if (error.status === 429 || error.status === 503) {
+        if (i === retries - 1) throw error;
+        console.log(`Gemini API rate limit/error (${error.status}). Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2;
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
 /**
  * Convert text to speech using Google Text-to-Speech API
  */
@@ -51,7 +85,7 @@ async function textToSpeech(text: string): Promise<Buffer | null> {
 export async function createGeminiCompletion(fileBuffer: Buffer): Promise<Buffer | null> {
   try {
     // Use Gemini Flash model for audio processing
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
     // Convert audio buffer to base64
     const base64Audio = fileBuffer.toString('base64');
@@ -88,7 +122,7 @@ export async function createGeminiCompletion(fileBuffer: Buffer): Promise<Buffer
  */
 export async function* createGeminiCompletionStream(fileBuffer: Buffer): AsyncGenerator<Buffer, void, unknown> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
     const base64Audio = fileBuffer.toString('base64');
 

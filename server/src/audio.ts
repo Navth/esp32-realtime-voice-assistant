@@ -42,7 +42,7 @@ export class AudioManager {
     private writeTimeout: NodeJS.Timeout | null = null;
     private isProcessing: boolean = false;
 
-    private config = this.configHighDef;
+    private config = this.configLowDef;
     constructor() {
         // Don't initialize file writer in constructor
     }

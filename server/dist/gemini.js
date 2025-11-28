@@ -82,7 +82,7 @@ function createGeminiCompletion(fileBuffer) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Use Gemini Flash model for audio processing
-            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
             // Convert audio buffer to base64
             const base64Audio = fileBuffer.toString('base64');
             // Create the content with audio
@@ -117,7 +117,7 @@ function createGeminiCompletionStream(fileBuffer) {
     return __asyncGenerator(this, arguments, function* createGeminiCompletionStream_1() {
         var _a, e_1, _b, _c;
         try {
-            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
             const base64Audio = fileBuffer.toString('base64');
             const result = yield __await(model.generateContentStream([
                 {

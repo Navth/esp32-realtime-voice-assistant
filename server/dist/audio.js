@@ -57,7 +57,7 @@ class AudioManager {
         };
         this.writeTimeout = null;
         this.isProcessing = false;
-        this.config = this.configHighDef;
+        this.config = this.configLowDef;
         this.audioBuffer = Buffer.alloc(0);
         this.WRITE_DELAY = 500; // Reduced to 500ms for more responsive writes
         this.MAX_BUFFER_SIZE = 1024 * 1024; // 1MB max buffer size to prevent memory issues

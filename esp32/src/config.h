@@ -70,7 +70,7 @@ enum AudioQuality
 
 const AudioQuality AUDIO_QUALITY_SPEAKER = AudioQuality::LOW_DEFINITION;
 const AudioQuality AUDIO_QUALITY = AudioQuality::HIGH_DEFINITION;
-const AudioQuality AUDIO_QUALITY_MIC = AudioQuality::HIGH_DEFINITION;
+const AudioQuality AUDIO_QUALITY_MIC = AudioQuality::LOW_DEFINITION;
 
 
 #endif
